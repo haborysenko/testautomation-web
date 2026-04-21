@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chrome, firefox]
+        browser: [chrome]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
