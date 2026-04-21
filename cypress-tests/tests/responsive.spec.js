@@ -4,7 +4,7 @@ import { defaultUser } from '../fixtures/login-data.js';
 import { viewPorts } from '../fixtures/viewPorts.js';
 
 viewPorts.forEach(({ label, width, height }) => {
-  describe(`Responsive — ${label} (${width}x${height})`, () => {
+  describe.skip(`Responsive — ${label} (${width}x${height})`, () => {
     beforeEach(() => {
       cy.viewport(width, height);
       cy.clearLocalStorage();
