@@ -22,7 +22,7 @@ module.exports = defineConfig({
       embeddedScreenshots: true,
       inlineAssets: true,
       saveAllAttempts: false,
-      autoOpen: true,
+      autoOpen: false,
     },
     setupNodeEvents(on, config) {
       require('cypress-mochawesome-reporter/plugin')(on);
