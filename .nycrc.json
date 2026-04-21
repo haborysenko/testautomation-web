@@ -1,0 +1,6 @@
+{
+  "include": ["app/js/**/*.js"],
+  "reporter": ["text", "text-summary"],
+  "temp-dir": "cypress-tests/.nyc_output",
+  "all": true
+}

@@ -1,0 +1,36 @@
+{
+  "name": "testautomation-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Single-page app + Cypress JavaScript automation framework",
+  "scripts": {
+    "instrument": "shx rm -rf app-instrumented && shx cp -r app app-instrumented && nyc instrument app/js app-instrumented/js",
+    "start:app": "NODE_OPTIONS=--no-deprecation http-server ./app-instrumented -p 8080 -s",
+    "test": "npm run instrument && shx rm -rf cypress-tests/.nyc_output && (start-server-and-test start:app http://localhost:8080 'cypress run --project cypress-tests'; TESTS_EXIT=$?; nyc report; exit $TESTS_EXIT)",
+    "test:chrome": "npm run instrument && shx rm -rf cypress-tests/.nyc_output && (start-server-and-test start:app http://localhost:8080 'cypress run --project cypress-tests --browser chrome'; TESTS_EXIT=$?; nyc report; exit $TESTS_EXIT)",
+    "test:firefox": "npm run instrument && shx rm -rf cypress-tests/.nyc_output && (start-server-and-test start:app http://localhost:8080 'cypress run --project cypress-tests --browser firefox'; TESTS_EXIT=$?; nyc report; exit $TESTS_EXIT)",
+    "test:spec": "npm run instrument && shx rm -rf cypress-tests/.nyc_output && (start-server-and-test start:app http://localhost:8080 'cypress run --project cypress-tests --spec $SPEC'; TESTS_EXIT=$?; nyc report; exit $TESTS_EXIT)",
+    "test:open":"npm run instrument && shx rm -rf cypress-tests/.nyc_output && start-server-and-test start:app http://localhost:8080 'cypress open --project cypress-tests'",
+    "coverage": "nyc report",
+    "lint": "eslint 'cypress-tests/{tests,support,fixtures}/**/*.js' --config cypress-tests/.eslintrc.json",
+    "format": "prettier --write --config cypress-tests/.prettierrc 'cypress-tests/{tests,support,fixtures}/**/*.js'",
+    "format:check": "prettier --check --config cypress-tests/.prettierrc 'cypress-tests/{tests,support,fixtures}/**/*.js'"
+  },
+  "overrides": {
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.0.5"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^4.0.3",
+    "cypress": "^15.0.0",
+    "cypress-axe": "^1.5.0",
+    "cypress-mochawesome-reporter": "^3.8.2",
+    "cypress-real-events": "^1.13.0",
+    "eslint": "^8.57.0",
+    "http-server": "^14.1.1",
+    "nyc": "^18.0.0",
+    "prettier": "^3.2.0",
+    "shx": "^0.3.4",
+    "start-server-and-test": "^2.0.3"
+  }
+}

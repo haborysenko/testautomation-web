@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "env": { "browser": true, "es2022": true, "mocha": true },
+  "extends": ["eslint:recommended"],
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+  "globals": {
+    "cy": "readonly",
+    "Cypress": "readonly",
+    "expect": "readonly",
+    "assert": "readonly"
+  },
+  "ignorePatterns": ["node_modules", "reports", ".nyc_output"]
+}

@@ -1,0 +1,10 @@
+node_modules/
+*.local.md
+cypress-tests/reports/
+cypress-tests/.nyc_output/
+cypress-tests/coverage/
+cypress-tests/downloads/
+app-instrumented/
+.DS_Store
+.claude/
+*.log

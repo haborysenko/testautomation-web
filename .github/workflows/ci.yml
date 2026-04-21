@@ -1,0 +1,58 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run lint
+      - run: npm run format:check
+
+  cypress:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instrument app
+        run: npm run instrument
+
+      - name: Run Cypress (${{ matrix.browser }})
+        uses: cypress-io/github-action@v6
+        with:
+          project: cypress-tests
+          start: npm run start:app
+          wait-on: 'http://localhost:8080'
+          wait-on-timeout: 60
+          browser: ${{ matrix.browser }}
+
+      - name: Print coverage
+        run: nyc report
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports-${{ matrix.browser }}
+          path: cypress-tests/reports
+          if-no-files-found: ignore
+          retention-days: 14
