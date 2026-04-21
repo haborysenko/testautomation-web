@@ -1,7 +1,7 @@
 import { onLoginPage } from '../support/pages/LoginPage.js';
 import { onHomePage } from '../support/pages/HomePage.js';
 import { defaultUser } from '../fixtures/login-data.js';
-import { viewPorts } from '../fixtures/viewPorts.js';
+import { viewPorts } from '../fixtures/viewports.js';
 
 viewPorts.forEach(({ label, width, height }) => {
   describe(`Responsive — ${label} (${width}x${height})`, () => {
