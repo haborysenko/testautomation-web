@@ -36,7 +36,7 @@ jobs:
           browser: ${{ matrix.browser }}
 
       - name: Print coverage
-        run: nyc report
+        run: npx nyc report
 
       - name: Upload reports
         if: always()
