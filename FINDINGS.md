@@ -5,7 +5,50 @@
 
 ---
 
-## 1. Bug Findings
+## Contents
+
+- [1. Recommendations](#1-recommendations)
+  - [Authentication](#authentication)
+  - [Input handling](#input-handling)
+  - [Testability](#testability)
+- [2. Bug Findings](#2-bug-findings)
+  - [BUG-001 — Credentials stored in plaintext client-side JavaScript](#bug-001--credentials-stored-in-plaintext-client-side-javascript)
+  - [BUG-002 — No error feedback on failed login](#bug-002--no-error-feedback-on-failed-login)
+  - [BUG-003 — Navigation items do not change content](#bug-003--navigation-items-do-not-change-content)
+  - [BUG-004 — No input validation on login form](#bug-004--no-input-validation-on-login-form)
+  - [BUG-005 — Password comparison uses loose equality](#bug-005--password-comparison-uses-loose-equality)
+  - [BUG-006 — Email comparison is case-sensitive](#bug-006--email-comparison-is-case-sensitive)
+  - [BUG-007 — No session expiry or timeout](#bug-007--no-session-expiry-or-timeout)
+  - [BUG-008 — User dropdown does not close on outside click](#bug-008--user-dropdown-does-not-close-on-outside-click)
+  - [BUG-009 — Login form cannot be submitted with the Enter key](#bug-009--login-form-cannot-be-submitted-with-the-enter-key)
+  - [BUG-010 — Password field has no placeholder text](#bug-010--password-field-has-no-placeholder-text)
+  - [BUG-011 — Password field value can be copied to clipboard](#bug-011--password-field-value-can-be-copied-to-clipboard)
+  - [BUG-012 — User dropdown overlaps content area below the nav bar](#bug-012--user-dropdown-overlaps-content-area-below-the-nav-bar)
+  - [BUG-013 — Email field does not receive focus on page load](#bug-013--email-field-does-not-receive-focus-on-page-load)
+  - [BUG-014 — Clicked nav item is not highlighted as active](#bug-014--clicked-nav-item-is-not-highlighted-as-active)
+  - [BUG-015 — Page heading has a hard-coded dark background colour](#bug-015--page-heading-has-a-hard-coded-dark-background-colour)
+  - [BUG-016 — Content area overflows its frame on viewport resize](#bug-016--content-area-overflows-its-frame-on-viewport-resize)
+
+---
+
+## 1. Recommendations
+
+### Authentication
+- Move auth server-side — never send credentials to the browser.
+- Replace `localStorage` state with token-based sessions that include expiry.
+
+### Input handling
+- Add `required`, `type="email"`, and `maxlength` to form fields.
+- Trim and lowercase email before comparison.
+- Replace `==` with `===` for all credential checks.
+- Reject whitespace-only values as empty.
+
+### Testability
+- Add `data-testid` attributes to key controls so selectors survive markup changes.
+
+---
+
+## 2. Bug Findings
 
 | ID | Title | Severity | Spec |
 |---|---|---|---|
@@ -165,22 +208,3 @@
 **Expected:** Content should reflow and remain within the container at all supported viewport widths.  
 **Test:** Visual / manual — covered partially by `responsive.spec.js` (checks visibility, not overflow).
 
----
-
-## 2. Recommendations
-
-### Authentication
-- Move auth server-side — never send credentials to the browser.
-- Replace `localStorage` state with token-based sessions that include expiry.
-
-### Input handling
-- Add `required`, `type="email"`, and `maxlength` to form fields.
-- Trim and lowercase email before comparison.
-- Replace `==` with `===` for all credential checks.
-- Reject whitespace-only values as empty.
-
-### Testability
-- Add `data-testid` attributes to key controls so selectors survive markup changes.
-
-### Observability
-- Assert on unexpected console errors in tests to catch silent failures early.
