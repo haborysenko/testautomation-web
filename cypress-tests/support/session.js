@@ -1,9 +1,9 @@
 import { onLoginPage } from './pages/LoginPage.js';
 
-const LOGGED_KEY = 'logged';
+const loggedKey = 'logged';
 
 export function getLogged() {
-  return cy.window().its('localStorage').invoke('getItem', LOGGED_KEY);
+  return cy.window().its('localStorage').invoke('getItem', loggedKey);
 }
 
 export function clearLogged() {

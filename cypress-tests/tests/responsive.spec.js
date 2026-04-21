@@ -1,9 +1,9 @@
 import { onLoginPage } from '../support/pages/LoginPage.js';
 import { onHomePage } from '../support/pages/HomePage.js';
 import { defaultUser } from '../fixtures/login-data.js';
-import { VIEWPORTS } from '../fixtures/viewports.js';
+import { viewPorts } from '../fixtures/viewPorts.js';
 
-VIEWPORTS.forEach(({ label, width, height }) => {
+viewPorts.forEach(({ label, width, height }) => {
   describe(`Responsive — ${label} (${width}x${height})`, () => {
     beforeEach(() => {
       cy.viewport(width, height);
