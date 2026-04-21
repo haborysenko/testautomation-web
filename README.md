@@ -1,115 +1,67 @@
 # Automation framework
 
-**Cypress + JavaScript** framework that tests the SPA in [app/](app/). App and tests live in one repo — clone once, `npm test`.
+**Cypress + JavaScript** framework that tests the SPA in [app/](app/).
 
 ## Quick start
 
 ```bash
+git clone <repo-url>   # or download ZIP from GitHub
+cd testautomation-web
 npm install
-npm test              # serves the app + runs Cypress headless (Electron)
-npm run test:chrome   # same, Chrome
-npm run test:firefox  # same, Firefox
-npm run test:open     # interactive runner (cypress open)
+
+# All commands below automatically start the app on http://localhost:8080,
+# wait for it to be ready, run Cypress, then shut the server down.
+npm test                     # runs Cypress headless (Electron)
+npm run test:chrome          # same, Chrome
+npm run test:firefox         # same, Firefox
+npm run test:open            # interactive runner (cypress open)
+
+SPEC="**/logout.spec.js" npm run test:spec  # run a single spec
+npm run coverage      # print coverage summary from the last run
 ```
 
-`start-server-and-test` boots `http-server ./app` on port 8080, waits for it, runs Cypress, then tears it down.
+### Running Cypress locally in headed mode
 
-### Running Cypress directly
-
-The Cypress project root is [cypress-tests/](cypress-tests/), so bare `npx cypress open` from the repo root won't find the config. Use either:
+The tests live in [cypress-tests/](cypress-tests/), so `npx cypress open` alone won't work from the repo root. Use:
 
 ```bash
-npm run test:open                            # ← recommended (serves app + opens runner)
-cd cypress-tests && npx cypress open         # ← if you already have the app running
-npx cypress open --project cypress-tests     # ← from repo root
+npm run test:open                            # ← recommended: starts the app and opens Cypress
+npx cypress open --project cypress-tests     # ← if the app is already running
 ```
 
 ## Layout
 
-Everything test-related is under [cypress-tests/](cypress-tests/) so the project has a clean separation between the SUT and the automation framework.
-
 ```
-app/                              ← SPA under test (static HTML/CSS/JS)
+app/                  ← SPA under test (static HTML/CSS/JS)
 cypress-tests/
-  cypress.config.js               ← Cypress config (project root for --project cypress-tests)
-  .eslintrc.json, .prettierrc     ← lint/format config scoped to tests
-  FINDINGS.md                     ← black-box bug findings + QE recommendations
-  tests/                          ← *.spec.js only
-    login-valid.spec.js           ← data-driven valid login, session persistence, keyboard login
-    login-invalid.spec.js         ← data-driven invalid inputs (incl. XSS/SQLi/unicode)
-    logout.spec.js                ← user-menu toggle + logout
-    menu.spec.js                  ← top navigation
-    responsive.spec.js            ← login and home view at mobile and tablet viewports
-  fixtures/
-    loginData.js                  ← valid + invalid user datasets
-  support/
-    index.js                      ← global hooks, cypress-axe, coverage tasks
-    session.js                    ← cy.session-backed loginAs() + assertions
-    a11y.js                       ← checkA11y wrapper (serious/critical only)
-    pages/
-      LoginPage.js                ← Page Object for login form
-      HomePage.js                 ← Page Object for nav, user menu, content
-  reports/                        ← mochawesome HTML, screenshots, videos (gitignored)
-  .nyc_output/                    ← raw coverage data (gitignored)
-.github/workflows/ci.yml          ← lint + Cypress matrix (Chrome + Firefox)
-.nycrc.json                       ← coverage config (spans app + tests, lives at root)
-package.json, .gitignore          ← stay at root (npm/git requirement)
+  tests/              ← spec files
+  fixtures/           ← test data
+  support/pages/      ← Page Objects (LoginPage, HomePage)
+  support/            ← shared helpers (session, a11y)
+FINDINGS.md           ← bug findings + QE recommendations
+.github/workflows/    ← CI
 ```
 
 ## Design choices
 
-- **Page Object Model**: [LoginPage.js](cypress-tests/support/pages/LoginPage.js) and [HomePage.js](cypress-tests/support/pages/HomePage.js) expose intent-named actions; specs never touch selectors directly. Each file exports a singleton (`onLoginPage`, `onHomePage`) so specs read as prose.
-- **DRY auth**: [session.js](cypress-tests/support/session.js) wraps `cy.session(...)` with a `validate` that reads `localStorage['logged']`. Post-login specs call `loginAs(user)` — no UI re-login per test.
-- **Data-driven**: `validInputs` and `invalidInputs` in [loginData.js](cypress-tests/fixtures/loginData.js) are iterated with `.forEach`. Adding a case = editing the fixture only.
-- **Negative/security inputs**: SQL injection, two flavours of XSS, unicode, whitespace-only, 500-char strings, case-sensitivity — all wired through the same invalid-login spec.
-- **Accessibility**: `cypress-axe` with the impact filter set to `serious`/`critical` on login, home, open-dropdown, and a full keyboard-only auth flow.
-- **Coverage**: every run instruments `app/js` with `nyc` and prints a text summary to the terminal after Cypress exits.
-- **HTML report**: `cypress-mochawesome-reporter` emits a self-contained HTML report to `cypress-tests/reports/html/index.html` after each run (screenshots embedded inline).
-- **KISS**: no DI, no custom runner, no Cucumber. Just Cypress + a few helpers.
+- **Page Object Model** — selectors live in [LoginPage.js](cypress-tests/support/pages/LoginPage.js) and [HomePage.js](cypress-tests/support/pages/HomePage.js), never in specs. Exported as singletons (`onLoginPage`, `onHomePage`) so tests read like plain English.
+- **Session reuse** — [session.js](cypress-tests/support/session.js) uses `cy.session()` so tests that need a logged-in user don't repeat the login UI flow every time.
+- **Data-driven tests** — valid and invalid inputs are defined once in [login-data.js](cypress-tests/fixtures/login-data.js) and looped over. Adding a test case means editing the fixture, not the spec.
+- **Security inputs** — the invalid-login spec covers SQL injection, XSS, unicode, whitespace, and 500-char strings.
+- **Accessibility** — `cypress-axe` checks for serious and critical violations on the login page and home page.
+- **Coverage** — each run instruments the app with `nyc` and prints a summary to the terminal.
+- **HTML report** — `cypress-mochawesome-reporter` generates a self-contained report with screenshots embedded after each run.
+- **No over-engineering** — no Cucumber, no custom runner, just Cypress and a few small helpers.
 
-## Scripts
-
-| Script | What it does |
-|---|---|
-| `npm test` | Instrument `app/js`, serve, run Cypress (Electron), print coverage |
-| `npm run test:chrome` / `test:firefox` | Same, specific browser |
-| `npm run test:spec` | Run a single spec headless with coverage — set `SPEC` env var |
-| `npm run test:open` | Launch the interactive runner |
-| `npm run coverage` | Print coverage summary from the last run |
-| `npm run lint` | ESLint over `cypress-tests/{tests,support,fixtures}/**/*.js` |
-| `npm run format` | Prettier write |
-
-### Running a single spec with coverage
-
-```bash
-SPEC="**/logout.spec.js*" npm run test:spec
-```
-
-Coverage summary is printed to the terminal after the spec finishes.
-
-### Coverage in open mode
-
-When running `npm run test:open`, coverage is collected automatically after each spec. The summary table is printed to the terminal but can be hard to spot in Cypress's verbose log output. To read it cleanly, open a second terminal tab and run after the spec finishes:
-
-```bash
-npm run coverage
-```
-
-This reads the already-captured data from `cypress-tests/.nyc_output/` — no need to re-run tests.
 
 ## CI
 
-[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on push to `main` and on every PR:
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs automatically on every push to `main` and on pull requests — no manual steps needed. It installs dependencies, instruments the app, runs all Cypress tests on Chrome, prints a coverage summary, and uploads the HTML report as a downloadable artifact.
 
-1. `npm install` with npm cache keyed on `package-lock.json`
-2. `npm run lint`
-3. Cypress in a Chrome + Firefox matrix via `cypress-io/github-action@v6`
-4. `cypress-tests/reports/` uploaded as an artifact (screenshots + videos on failure)
+## Known coupling
 
-## Source-of-truth coupling
+The test credentials in [login-data.js](cypress-tests/fixtures/login-data.js) mirror the hardcoded users in [app/js/users.js](app/js/users.js). If the app's users change, the fixture needs to be updated too. This is flagged as a known issue in [FINDINGS.md](FINDINGS.md).
 
-[cypress-tests/fixtures/loginData.js](cypress-tests/fixtures/loginData.js) mirrors credentials from [app/js/users.js](app/js/users.js). If the app's users change, update both — or add `data-testid` attributes and import the file directly. Flagged in [FINDINGS.md](cypress-tests/FINDINGS.md).
+## Findings
 
-## Findings & recommendations
-
-[FINDINGS.md](cypress-tests/FINDINGS.md) captures what black-box testing surfaced: nine bugs (one critical security issue), coverage gaps, CI/CD recommendations, and broader quality-engineering notes. Treat it as the QE deliverable alongside the automation code.
+[FINDINGS.md](FINDINGS.md) documents bugs found during black-box testing — including one critical security issue — along with recommendations for improvement.
