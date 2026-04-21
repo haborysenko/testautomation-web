@@ -20,6 +20,9 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Instrument app
         run: npm run instrument
 
