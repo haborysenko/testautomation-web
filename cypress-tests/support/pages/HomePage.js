@@ -31,15 +31,6 @@ export class HomePage {
     cy.get('#content p').should('have.length.gte', 1);
   }
 
-  // Scrolls when not fully visible
-  scrollToBottom() {
-    cy.get('.div-container').then(($el) => {
-      if ($el[0].scrollHeight > $el[0].clientHeight) {
-        cy.wrap($el).scrollTo('bottom');
-      }
-    });
-  }
-
   verifyNavItemExists(item) {
     cy.get(`.${item}`).should('exist');
   }
