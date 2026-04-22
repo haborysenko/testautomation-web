@@ -18,6 +18,7 @@ viewPorts.forEach(({ label, width, height }) => {
       onHomePage.verifyNavVisible();
       onHomePage.verifyContentVisible();
       onHomePage.verifyParagraphsExist();
+      onHomePage.scrollToBottom();
       onHomePage.verifyAvatarVisible();
       onHomePage.openUserMenu();
       onHomePage.closeUserMenu();
